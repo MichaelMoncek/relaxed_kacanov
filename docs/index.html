@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>My Project documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=332265cf" />
+    <script src="_static/documentation_options.js?v=d6d90d09"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/sg-tags.js?v=d80f6fa4"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="toctree-wrapper compound">
+<span id="document-auto_examples/introduction"></span><div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-introduction-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="relaxed-kacanov-iteration-for-p-poisson-problem-with-adaptive-error-control">
+<span id="sphx-glr-auto-examples-introduction-py"></span><h1>Relaxed Kačanov iteration for p-Poisson problem with adaptive error control<a class="headerlink" href="#relaxed-kacanov-iteration-for-p-poisson-problem-with-adaptive-error-control" title="Link to this heading">¶</a></h1>
+<p>In this demo, we will first describe and then implement the
+adaptive error control algorithm for p-Poisson problem using
+relaxed Kačanov method</p>
+<section id="p-poisson-problem">
+<h2>p-Poisson Problem<a class="headerlink" href="#p-poisson-problem" title="Link to this heading">¶</a></h2>
+<p>The strong from of the p-Poisson problem is defined as follows:</p>
+<div class="math">
+<p><img src="_images/math/9bfe91849b6d62a5ae9e4dd47c89dc315368ca4c.png" alt="\begin{align*}
+     - \nabla \cdot (|\nabla u|^p \nabla u) = f \quad \text{ on }
+     \Omega\\
+     u  = 0 \quad \text{ on } \partial \Omega
+\end{align*}"/></p>
+</div><p>The weak from of the p-Poisson problem is defined as follows:</p>
+<p>Find <img class="math" src="_images/math/b572002daef78e3ba6d937366f83114846586dfa.png" alt="u"/> in <img class="math" src="_images/math/819612f75f8de2f847eed112a049880cfa633d6b.png" alt="W^{1,p}_0(\Omega)"/> such that the
+following holds for all <img class="math" src="_images/math/0e413a7336c71b639301ff57d406fc827bd3f4cb.png" alt="v"/> in <img class="math" src="_images/math/819612f75f8de2f847eed112a049880cfa633d6b.png" alt="W^{1,p}_0(\Omega)"/></p>
+<div class="math">
+<p><img src="_images/math/8b35778505322b27e0b4e1746097a334af837629.png" alt="\begin{align*}
+   \int_{\Omega} |\nabla u|^{p-2} \nabla u \cdot
+   \nabla v \, dx = \left&lt; f, v \right&gt;
+\end{align*}"/></p>
+</div><p>for open and bounded <img class="math" src="_images/math/b145992fee8475725e736b98233c5c8a61d1435c.png" alt="\Omega \subset \mathbb{R}^n"/> and
+for <img class="math" src="_images/math/28874af5eadbf3af6a8a1edf3de24f859fe998cf.png" alt="1 &lt; p &lt; \infty"/></p>
+<p>The solution of such problem is also the unique minimizer
+of the energy <img class="math" src="_images/math/34e193de998614e8494bd24073032aff5e2f9d9b.png" alt="\mathcal{J} : W^{1,p}_0(\Omega) \rightarrow
+\mathbb{R}"/> defined as:</p>
+<div class="math">
+<p><img src="_images/math/e7e68cca916430b9f046c608c49813d2a43f4de0.png" alt="\mathcal{J}(v) := \frac{1}{p} \int_{\Omega} | \nabla v|^p \, dx
+- \langle f, v \rangle"/></p>
+</div></section>
+<section id="relaxed-kacanov-iteration">
+<h2>Relaxed Kačanov iteration<a class="headerlink" href="#relaxed-kacanov-iteration" title="Link to this heading">¶</a></h2>
+<p>The weak formulation can be understood as the following
+weighted Poisson problem:</p>
+<div class="math">
+<p><img src="_images/math/3ecd1b61a17525e69beab3ebe601f2c4f05bbb02.png" alt="\begin{align*}
+   \int_{\Omega} a^{p-2} \nabla u \cdot
+   \nabla v \, dx = \left&lt; f, v \right&gt; \quad
+   \forall v \in W^{1,2}_0{\Omega}
+\end{align*}"/></p>
+</div><p>for given <img class="math" src="_images/math/d552e5e0c61dad680fd662263f468fa1daa18ed9.png" alt="f"/> and <img class="math" src="_images/math/23cdf5bb987f45c096a3a5eb487f8d97ebb415fd.png" alt="a : \Omega \rightarrow \mathbb{R}"/>
+such that <img class="math" src="_images/math/594271b9037c10f8cafc3cb5bb2554f90cd4455e.png" alt="a = |\nabla u|"/>.</p>
+<p>We can than look for the iterative solution <img class="math" src="_images/math/f70bf699787148281d4ed717797241007aa87451.png" alt="u_n"/>
+in the following fashion:</p>
+<div class="math">
+<p><img src="_images/math/d6d3705ad4d20cf0a80c920e8061d7bc53126a11.png" alt="\begin{align*}
+   \int_{\Omega} |\nabla u_n|^{p-2} \nabla u_{n+1} \cdot
+   \nabla v \, dx = \left&lt; f, v \right&gt; \quad
+   \forall v \in W^{1,2}_0{\Omega}
+\end{align*}"/></p>
+</div><p>which only requires solving a linear problem.
+This problem might be ill-posed in case that the weight
+<img class="math" src="_images/math/6e9a4da1a702b1a81d6aac746f0073e58564a2bd.png" alt="|\nabla u_n|^{p-2}"/> aproaches zero or gets too large.</p>
+<p>A possible solution is the introduction of two relaxation
+parameters <img class="math" src="_images/math/f518b438aaab440425ecd8ee722ea7162dcb81b9.png" alt="\epsilon_{-}"/>, <img class="math" src="_images/math/24151352f7c7caa911d6e679a178e54406becb27.png" alt="\epsilon_{+} \in (0, \inf)"/>,
+<img class="math" src="_images/math/b727974983750ad018b803e33e753fa58dfea8f6.png" alt="\epsilon_{-} \leq \epsilon_{+}"/>, which will ensure that
+<img class="math" src="_images/math/c5f97dab5e40dac310d0a9534b6ca700b48051c5.png" alt="a"/> will be bounded from above and from zero. We will
+also write
+<img class="math" src="_images/math/79a6a0697e942aa3737e03f88a3eea896ed5f6a7.png" alt="\epsilon = \left[ \epsilon_{-}, \epsilon_{+} \right]"/>.
+We will therefore replace <img class="math" src="_images/math/c5f97dab5e40dac310d0a9534b6ca700b48051c5.png" alt="a"/> by the following quantity:</p>
+<div class="math">
+<p><img src="_images/math/9b0205e3fa042c471813eb9aba3447740bcc3939.png" alt="\epsilon_{-} \land a \lor \epsilon_{+} :=
+\max \left\{ \epsilon_{-}, \min \left\{ a,
+\epsilon_{+} \right\} \right\}"/></p>
+</div><p>Note that this is identity if <img class="math" src="_images/math/a7540211c5daddfb1d48d3549104dec6b11e6c60.png" alt="a(x) \in \epsilon"/>
+otherwise <img class="math" src="_images/math/f5225ae3b9085f8267d1a877182fe471505ddf3c.png" alt="a(x)"/> gets assigned <img class="math" src="_images/math/f518b438aaab440425ecd8ee722ea7162dcb81b9.png" alt="\epsilon_{-}"/> or
+<img class="math" src="_images/math/6ca914e0bdbf4da783f67476c676468d5cccf8de.png" alt="\epsilon_{+}"/> depending on which one is closer.
+For the case <img class="math" src="_images/math/06721e57a73c71656a555866ddc98656818d1bbd.png" alt="\epsilon_{-} \searrow 0"/> and
+<img class="math" src="_images/math/5f2d9a5aed085010d3fd47faa1ec0bb4f702a566.png" alt="\epsilon_{-} \nearrow \infty"/> we recover
+the original problem.</p>
+<p>This is leads us to the following algorithm:</p>
+<pre class="literal-block"><strong>Algorithm:</strong> The relaxed <img class="math" src="_images/math/fa24960fc8a44e59e8239afad336ddcadb623aab.png" alt="p"/>-Kačanov algorithm
+
+<strong>Data:</strong> <img class="math" src="_images/math/d33da4bcf2dd2b10df58aeeb1f830a7060528f9f.png" alt="f \in (W^{1,p}_0(\Omega))^{*},
+u_0 \in W^{1,2}_0(\Omega)"/>
+<strong>Initialize:</strong> <img class="math" src="_images/math/7d0e9364e0b2fd77691fea69920ffc6276ccc9e6.png" alt="\epsilon_0 = [1, 1]
+\subset (0, \infty), \, n = 0"/>
+
+<strong>while</strong> desired accuracy is not achieved <strong>do</strong>
+    │ Define <img class="math" src="_images/math/eb6d9c0f599d6debe435b526e89b121004ad008b.png" alt="a_n := \epsilon_{n,-} \lor
+    |\nabla v_n| \land \epsilon_{n,+}"/>
+    │
+    │ Calculate <img class="math" src="_images/math/17b6173ff2ff69a07d9ae587294ddce0b27c2808.png" alt="u_{n+1}"/> by solving:
+    │
+    │     <img class="math" src="_images/math/9ec279cf131d036c4c932a52931ee1c28b8c22f7.png" alt="\int_\Omega a_n^{p-2} \nabla u_{n+1} \cdot
+    \nabla v \, dx = \langle f, v \rangle \quad
+    \forall v \in W^{1,2}_0(\Omega)"/>;
+    │
+    │ Choose new relaxation interval <img class="math" src="_images/math/a0e2a9624252ba0b149b15ac9178c8603997e802.png" alt="\epsilon_{n+1}
+    \supset \epsilon_{n}"/>;
+    │ Increase <img class="math" src="_images/math/c00253111dc0557d5f349a12bd7518df555ae650.png" alt="n"/> by 1;
+<strong>end</strong></pre>
+<p>this algorithm is called the Relaxed Kačanov method.
+A justification of why it converges can be find
+for example here <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#document-auto_examples/relaxed_Kacanov#id5" title="Lars Diening, Massimo Fornasier, and Maximilian Wank. A relaxed kačanov iteration for the $p$-poisson problem. 2022. URL: https://arxiv.org/abs/1702.03844, arXiv:1702.03844.">DFW22</a>]</span>.</p>
+<p>We will now discuss how to choose <img class="math" src="_images/math/08f616b4b38b266ef356b356f1e9d08ba9e18b43.png" alt="\epsilon_{n}"/>.
+In <span class="bibtex-citation" id="id2">[<a class="reference internal" href="#document-auto_examples/relaxed_Kacanov#id5" title="Lars Diening, Massimo Fornasier, and Maximilian Wank. A relaxed kačanov iteration for the $p$-poisson problem. 2022. URL: https://arxiv.org/abs/1702.03844, arXiv:1702.03844.">DFW22</a>]</span> the following choice of <img class="math" src="_images/math/06f6f9f05d8213a2cea9376b012500c7fb311463.png" alt="\epsilon_n"/>
+is suggested:</p>
+<p><img class="math" src="_images/math/02bc24dab7509ab9da43d03daf1e1c4f569269b7.png" alt="\epsilon_n := \left[(n+1)^{-\alpha}, (n+1)^{\beta}\right]"/>
+with <img class="math" src="_images/math/c4de389c72591ffd99a74cfd2529098583592f4b.png" alt="\alpha, \beta &gt; 0"/> and
+<img class="math" src="_images/math/b3951c531143a27dce3d5c275794fdae48120309.png" alt="\alpha + \beta &lt; 1 / (2-p)"/></p>
+<p>However it is possible to do even better by utilizing
+adaptive error estimates, which we will discuss in
+the following section.</p>
+</section>
+<section id="error-estimates">
+<h2>Error estimates<a class="headerlink" href="#error-estimates" title="Link to this heading">¶</a></h2>
+<p>We will start by defining the following energy:</p>
+<div class="math">
+<p><img src="_images/math/415d1d474100c53bfa19efe4d9f0dc7aa44aa587.png" alt="\mathcal{J}(v, a) = \int_{\Omega} \frac{1}{2} a^{p-2}
+| \nabla v |^2 + \left( \frac{1}{p} - \frac{1}{2} \right)
+a^p \, dx - \langle f, v \rangle."/></p>
+</div><p>Note that this energy does coincide with the original energy
+for <img class="math" src="_images/math/194d50782095d760e60a6f614d7046c560d7b3d8.png" alt="a = | \nabla v|"/>.
+This newly defined energy is also convex with respect to
+<img class="math" src="_images/math/3a7492f6907d02cfc6f46777c8b78a7a590b45d0.png" alt="(a, v)"/> since <img class="math" src="_images/math/862b5ce04ea5b451d7cbe1cfe0c1a4571535bff4.png" alt="(t,a) \mapsto \frac{1}{2}
+a^{p-2} t^2"/> is convex on <img class="math" src="_images/math/50763fbc2d04be1be4346fc6c08c6c589d3b5e28.png" alt="[0, \infty), 1 &lt; p \leq 2"/> and
+the addition of two convex functions is still a convex function.
+Minimization of this energy energy leads to the following problem:</p>
+<div class="math">
+<p><img src="_images/math/f1f7fa8866fd393674d0848dde5354c677d7d1c1.png" alt="- \text{div}(a^{p-2} \nabla v) = f"/></p>
+</div><p>However this problem loses its ellipticity as
+<img class="math" src="_images/math/86a74bc27258d25736b3281d95fd04c5e11f1cc8.png" alt="a(x) \rightarrow 0"/> and <img class="math" src="_images/math/c9e50a0b61a7bb4c0d5c9d31f7b04f38b031e245.png" alt="a(x) \rightarrow \infty"/>.</p>
+<p>The remedy is to restrict <img class="math" src="_images/math/c5f97dab5e40dac310d0a9534b6ca700b48051c5.png" alt="a"/> to
+<img class="math" src="_images/math/3c65067dacb98c8f212884dbfc8413a6db2eb8d5.png" alt="\epsilon = \left[ \epsilon_{-}, \epsilon_{+} \right]
+\subset (0, \infty)"/>
+We can than define another relaxed energy:</p>
+<div class="math">
+<p><img src="_images/math/9b7bb68b7e3919dcf3a83159ff1245c4fe3e04f0.png" alt="\mathcal{J}_{\epsilon}(v) := \mathcal{J}(v, \epsilon_{-} \lor
+| \nabla v | \land \epsilon_{+}) = \underset{a: \epsilon_{-}
+\leq a \leq \epsilon_{+}}{\min} \mathcal{J}(v, a)."/></p>
+</div><p>The relaxed energy <img class="math" src="_images/math/31f9614917436ab54ecbd5cdba498ce4c4af245b.png" alt="\mathcal{J}_{\epsilon}(v)"/> is
+monotonically decreasing with respect to <img class="math" src="_images/math/6f2a9220cfe56c04b49986b1d41eea5dca0ea14f.png" alt="\epsilon"/>
+i.e increasing the relaxation interval <img class="math" src="_images/math/6f2a9220cfe56c04b49986b1d41eea5dca0ea14f.png" alt="\epsilon"/>
+decreases the energy <img class="math" src="_images/math/31f9614917436ab54ecbd5cdba498ce4c4af245b.png" alt="\mathcal{J}_{\epsilon}(v)"/>.
+We can also write <img class="math" src="_images/math/21a5e6d5117f094516bf556f07dfd8a5950cb2db.png" alt="\mathcal{J}_{\epsilon}"/> explicitely
+as:</p>
+<div class="math">
+<p><img src="_images/math/48752187a11101101ab3c5d24a062877b7b0ee91.png" alt="\begin{align*}
+   \mathcal{J}_{\epsilon}(v) = \int_{\Omega}
+   \kappa_{\epsilon}(| \nabla v|) \, dx - \langle f, v \rangle
+\end{align*}"/></p>
+</div><p>with <img class="math" src="_images/math/a7370957f820ca149f2e123974de2f0e10c2215d.png" alt="\kappa_{\epsilon} : \mathbb{R}_{\geq 0} \rightarrow
+\mathbb{R}"/> given by</p>
+<div class="math">
+<p><img src="_images/math/41447e57d9fd1c915ec30f3725813c09d03eb4a2.png" alt="\begin{align*}
+   \kappa_{\epsilon}(t) :=
+   \begin{cases}
+      \frac{1}{2} \epsilon_{-}^{p-2} \, t^2 +
+      \left( \frac{1}{p} - \frac{1}{2}\right)\epsilon_{-}^p
+      \quad \text{ for } t \leq \epsilon_{-} \\
+      \frac{1}{p} t^p \hspace{9em}
+      \text{ for } t \in [\epsilon_{-}, \epsilon_{+}]\\
+      \frac{1}{2} \epsilon_{+}^{p-2} \, t^2 +
+      \left( \frac{1}{p} - \frac{1}{2}\right)\epsilon_{+}^p
+      \quad \text{ for } t \geq \epsilon_{+} \\
+   \end{cases}
+\end{align*}"/></p>
+</div><p>Next let us define</p>
+<div class="math">
+<p><img src="_images/math/d49d896e9c2f4c6e32c12107bcdec5105447a01a.png" alt="\phi_{\epsilon}(t) := \kappa(t) - \kappa(0)"/></p>
+</div><p>Explicitely</p>
+<div class="math">
+<p><img src="_images/math/4c1dc44bb4575d66639d570f0ccf0e1d95a99b2a.png" alt="\begin{align*}
+   \phi_{\epsilon}(t) :=
+   \begin{cases}
+       \frac{1}{2} \epsilon_{-}^{\, p-2} t^2 \hspace{7em}
+       \text{ for } t \leq \epsilon_{-}^{p-1} \\
+       \frac{1}{p'}  t^{\, p'}  - C \epsilon_{-}^p \hspace{5.25em}
+       \text{ for }
+       \epsilon_{-}^{\, p-1} \leq t \leq \epsilon_{+}^{p-1} \\
+       \frac{1}{2} \epsilon_{+}^{\, p-2} t^2 +
+       C(\epsilon_{+}^p - \epsilon^p_{-}) \quad
+       \text{ for } t \geq \epsilon_{+}^{p-1} \\
+   \end{cases}
+\end{align*}"/></p>
+</div><p>which is an example of so-called N-function.
+Observe that</p>
+<div class="math">
+<p><img src="_images/math/451a1b5b1267c04eb674224e96084993a04b0d1b.png" alt="\frac{\phi'_{\epsilon}(t)}{t} = \left(\epsilon_{-} \lor
+t \land \epsilon_{+} \right)^{p-2}"/></p>
+</div><p>Next we will compute the convex conjugate of <img class="math" src="_images/math/2f40e671a479074d933f1c28d0164d5934296366.png" alt="\phi"/>
+which we will need later.</p>
+<div class="math">
+<p><img src="_images/math/969cf1e50d25371292fcb16df66f8248f65c9966.png" alt="\begin{align*}
+   \phi_{\epsilon}^{*}(t) :=
+   \begin{cases}
+       \frac{1}{2} \epsilon_{-}^{2-p} t^2 \hspace{7em}
+       \text{ for } t \leq \epsilon_{-}^{p-1} \\
+       \frac{1}{p'}  t^{p'}  + C \epsilon_{-}^p \hspace{5.25em}
+       \text{ for }
+       \epsilon_{-}^{p-1} \leq t \leq \epsilon_{+}^{p-1} \\
+       \frac{1}{2} \epsilon_{+}^{2-p} t^2 -
+       C(\epsilon_{+}^p - \epsilon^p_{-}) \quad
+       \text{ for } t \geq \epsilon_{+}^{p-1} \\
+   \end{cases}
+\end{align*}"/></p>
+</div><p>where <img class="math" src="_images/math/4107d574ccd758685e7daebfe09a23725a282f32.png" alt="p' \in [1, \infty]"/> is the usual conjugate exponent of <img class="math" src="_images/math/fa24960fc8a44e59e8239afad336ddcadb623aab.png" alt="p"/> s.t.
+<img class="math" src="_images/math/4b3202f11b7019331bd612e5785c7bff79185709.png" alt="1/p + 1/p' = 1"/> and <img class="math" src="_images/math/9499c90229764298ace01aa7c1a02a3943c311b5.png" alt="C = (1/p - 1/2)"/></p>
+<p>Next we define for all <img class="math" src="_images/math/1365eb4a8605efa3530d35accaac9d392c0e4856.png" alt="a \geq 0"/> the <em>shifted</em> N-function
+<img class="math" src="_images/math/d1afb28fd6d215bfc5df2950af69164f75ae73a6.png" alt="\varphi_a"/> by its derivative</p>
+<div class="math">
+<p><img src="_images/math/e8d7e6b964081e74d4bee1a0e8204e2c5430b94e.png" alt="\begin{align*}
+   \varphi'_a(t) := \frac{\varphi'(t \lor a)}{t \lor a} t
+   \quad \text{ and } \quad
+   \varphi_a(t) = \int_0^t \varphi'_a(\tau) \, d\tau
+\end{align*}"/></p>
+</div><p>With all this prepared we can explicitely write down
+<img class="math" src="_images/math/c2c8ea82005b61a2cc59822758c04bf454e2b2d6.png" alt="(\phi_{\epsilon, a})^{*}"/> needed for the
+discretization and linearization error estimators.</p>
+<p><strong>Warning!</strong>
+We have collision of notation as the lower index means both
+<img class="math" src="_images/math/7e195b6ca4c8f9ee5c882e7566280c80ea25a3f5.png" alt="\phi_{\epsilon}"/> — a funcition defined above
+and the truncation of a function.
+Therefore we will write <img class="math" src="_images/math/4d94d7fc0ce1fb61be085d2e5d604b2f2b2591be.png" alt="\phi_{\epsilon, a}"/> which
+means <img class="math" src="_images/math/7e195b6ca4c8f9ee5c882e7566280c80ea25a3f5.png" alt="\phi_{\epsilon}"/> truncated by <img class="math" src="_images/math/c5f97dab5e40dac310d0a9534b6ca700b48051c5.png" alt="a"/>.</p>
+<p>To make our lives easier we can use
+<strong>Lemma 33</strong> of <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#document-auto_examples/relaxed_Kacanov#id5" title="Lars Diening, Massimo Fornasier, and Maximilian Wank. A relaxed kačanov iteration for the $p$-poisson problem. 2022. URL: https://arxiv.org/abs/1702.03844, arXiv:1702.03844.">DFW22</a>]</span>:</p>
+<div class="math">
+<p><img src="_images/math/69356f749ac90b1953813a8555468008bffcf53b.png" alt="(\varphi_a)^{*} = (\varphi^{*})_{\varphi'(a)}"/></p>
+</div><p>and the following property of <img class="math" src="_images/math/b1a98af2b32997aaed68a52339cfc945c37a7606.png" alt="\varphi"/>:</p>
+<div class="math">
+<p><img src="_images/math/5a5c081ee5dee7cf328f3801aea3f55927e39f27.png" alt="(\varphi^{*})'(t) = (\varphi')^{-1}(t)"/></p>
+</div><p>which is a direct consequence of the definition of the
+convex conjugate.
+Defining <img class="math" src="_images/math/60448ba2fd42d6f85fd3acdfd5a1c4e280768c47.png" alt="C(a) = (\epsilon_{-} \lor a \land \epsilon_{+})"/>
+we can write:</p>
+<div class="math">
+<p><img src="_images/math/9c2ea77d3e8e0d1d16bae5c346ff29a589ebd5bc.png" alt="\begin{align*}
+   \phi_{\epsilon, a}^{*}(t) :=
+   \begin{cases}
+       \frac{1}{2} C(a)^{2-p} t^2 \hspace{7.5em}
+       \text{ for } t \leq C(a)^{p-2}a \\
+       \phi^{*}(t) + \phi(a) - \frac{1}{2} C(a)^{p-2}a^2
+       \quad \text{ for } t \geq C(a)^{p-2}a
+   \end{cases}
+\end{align*}"/></p>
+</div><p>Finally we are ready to introduce the adaptive version
+of the previous algorithm.
+This method will capture the effect of truncation of
+<img class="math" src="_images/math/c5f97dab5e40dac310d0a9534b6ca700b48051c5.png" alt="a"/>, the discretization error and the fixpoint
+iteration error.
+Lets start by defining the following error measures:</p>
+<p><strong>Upper truncation error</strong></p>
+<div class="math">
+<p><img src="_images/math/64cd8b602e8e959274959e1a104b7894d4a17433.png" alt="\eta_{\epsilon_{+}}^2(v_n) := \mathcal{J}_{\epsilon_n}(v_n) -
+\mathcal{J}_{(\epsilon_{n,-}, \infty)}(v_n)"/></p>
+</div><p>which measures the effect of the upper truncation bound
+<img class="math" src="_images/math/a989a159739221600f69e82dffb4041de1ddb58d.png" alt="\epsilon_{n,+}"/>.</p>
+<p><strong>Lower truncation error</strong></p>
+<div class="math">
+<p><img src="_images/math/28908fb5d456da79920fdf097ed43623f6283082.png" alt="\eta_{\epsilon_{-}}^2(v_n) := \mathcal{J}_{\epsilon_n}(v_n) -
+\mathcal{J}_{(0, \epsilon_{n,+})}(v_n)"/></p>
+</div><p>which measures the effect of the lower truncation bound
+<img class="math" src="_images/math/9ba4610e6a74dadbf2e5159b8fe810b6f124a48a.png" alt="\epsilon_{n,-}"/>.</p>
+<p><strong>Discretization error</strong></p>
+<p>We use the optimal estimator <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#document-auto_examples/relaxed_Kacanov#id6" title="Lars Diening and Christian Kreuzer. Linear convergence of an adaptive finite element method for the p-laplacian equation. SIAM Journal on Numerical Analysis, 46(2):614–638, 2008. URL: http://www.jstor.org/stable/40233226 (visited on 2026-08-22).">DK08</a>]</span> with
+the <img class="math" src="_images/math/42f746ce768ea7094b9e11132e79c6cffced2418.png" alt="\phi_{\epsilon_n}"/> to estimate discretiztion
+error on mesh element <img class="math" src="_images/math/22e1a2659851bf5039487fc7ca9abd7c436ae089.png" alt="T"/>:</p>
+<div class="math">
+<p><img src="_images/math/5d47d9a8743e1ecc44bc05a0309d54c56ee8c812.png" alt="\eta_h^2(v_n) := \int_T (\phi_{\epsilon_n, | \nabla v_n|})^{*}
+(h_T |f|) \, dx \: + \: \sum_{F \subset \partial T} h_F
+\int_F | \llbracket V(v_n) \rrbracket |_F^2 \, ds"/></p>
+</div><p><strong>Linearization error</strong></p>
+<p>To measure the linearization error we will use the following
+estimator proposed in <span class="bibtex-citation" id="id5">[<a class="reference internal" href="#document-auto_examples/relaxed_Kacanov#id5" title="Lars Diening, Massimo Fornasier, and Maximilian Wank. A relaxed kačanov iteration for the $p$-poisson problem. 2022. URL: https://arxiv.org/abs/1702.03844, arXiv:1702.03844.">DFW22</a>]</span></p>
+<div class="math">
+<p><img src="_images/math/8ec9d25eaa2b9eec213912430451e1ad564a7491.png" alt="\eta_{lin}^2(v_n) := \int_{\Omega}
+(\phi_{\epsilon, | \nabla v_n|})^{*}
+\left( \frac{\phi'_{\epsilon}(| \nabla v_{n-1}|)}{
+\nabla v_{n-1}|} | \nabla (v_{n-1} - v_{n}| \right) \, dx"/></p>
+</div><p>with help of these estimators we can finally write down
+the full adaptive algorithm for the relaxed p-Kačanov iteration.</p>
+<pre class="literal-block"><strong>Algorithm:</strong> The relaxed <img class="math" src="_images/math/fa24960fc8a44e59e8239afad336ddcadb623aab.png" alt="p"/>-Kačanov algorithm
+
+<strong>Data:</strong> <img class="math" src="_images/math/d33da4bcf2dd2b10df58aeeb1f830a7060528f9f.png" alt="f \in (W^{1,p}_0(\Omega))^{*},
+u_0 \in W^{1,2}_0(\Omega)"/>
+<strong>Initialize:</strong> <img class="math" src="_images/math/791914d8ec2de23f86c0dabe58994cc17aa45bb1.png" alt="\epsilon_0 = [1, 1]
+\subset (0, \infty)"/>, <img class="math" src="_images/math/83e6c4e6a6f0d8b95304e7cbd2a3e9ed5b788b41.png" alt="n = 0"/>
+
+<strong>while</strong> desired accuracy is not achieved <strong>do</strong>
+    │ Define <img class="math" src="_images/math/9b1de65d9f5d16203ecb4cbcb848cb9a2ad69d80.png" alt="a_n := \epsilon_{n,-} \lor
+    |\nabla u_n| \land \epsilon_{n,+}"/>
+    │
+    │ Calculate <img class="math" src="_images/math/17b6173ff2ff69a07d9ae587294ddce0b27c2808.png" alt="u_{n+1}"/> by solving
+    │     <img class="math" src="_images/math/14a34ca768730123733db3052ef92fc86aa888fd.png" alt="\int_\Omega a_n^{p-2} \nabla u_{n+1}
+    \cdot \nabla v \, dx = \langle f, v \rangle"/>
+    │
+    │ Increase the total cost by the current number of degrees of freedom
+    │
+    │ Compare the estimators <img class="math" src="_images/math/6b99e27b317f4ac285b85f8746862d4fd3f46958.png" alt="\eta^2_{\epsilon+}(u_n),
+    \eta^2_{\epsilon-}(u_n), \eta^2_h(u_n), \eta^2_{lin}(u_n)"/>:
+    │     <strong>if</strong> <img class="math" src="_images/math/22297257fbc03ab8133b9f193f1cd07fe40d80ff.png" alt="\eta^2_{\epsilon+}"/> is largest:
+    │        <img class="math" src="_images/math/907e99d1957864581ad8edebe57950066447c379.png" alt="\epsilon_{n+1,+} := 1.25\,\epsilon_{n,+}"/>
+    │     <strong>if</strong> <img class="math" src="_images/math/7848f5e3358028c3797b6f1b4c58174768eb791b.png" alt="\eta^2_{\epsilon-}"/> is largest:
+    │        <img class="math" src="_images/math/5a064c7a21883abe7bbc2a56998622ba66439352.png" alt="\epsilon_{n+1,-} := 0.80\,\epsilon_{n,-}"/>
+    │     <strong>if</strong> <img class="math" src="_images/math/ad1b3ff1612f7a914f3d27a056851475e244d8fd.png" alt="\eta^2_h"/> is largest:
+    │        refine the mesh by Dörfler marking
+    │     <strong>if</strong> <img class="math" src="_images/math/04c5ed4a68ffeca3cbe73ae3007bc3d4dc441855.png" alt="\eta^2_{lin}"/> is largest:
+    │        set <img class="math" src="_images/math/64957da81704c4f32317fe75f02d4d3d33514cfa.png" alt="n := n+1"/>
+<strong>end</strong></pre>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-introduction-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="_downloads/43b043298776e67324a73dc64c1907de/introduction.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">introduction.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="_downloads/621826b2503bfc5eb101cb880846b8c3/introduction.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">introduction.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="_downloads/3c42199846d6c11a9c47e72335afc596/introduction.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">introduction.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+<span id="document-auto_examples/relaxed_Kacanov"></span><div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-relaxed-kacanov-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<p class="sphx-glr-example-title" id="sphx-glr-auto-examples-relaxed-kacanov-py">p-Poisson solver with adaptive error control in Firedrake
+by Michael Moncek</p>
+<section id="implementation">
+<h1>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h1>
+<p>Lets begin by importing the necessary libraries:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">firedrake</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">firedrake</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">netgen.occ</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>This is a safeguard as inner(v,v) might return negative
+value because of FPA</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">norm_safe</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">max_value</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">v</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We will write <img class="math" src="_images/math/90993d499b031a76638f228118752850c4f1bc8a.png" alt="\kappa_{\epsilon}(t)"/> in slightly convoluted
+way to avoid problems with FPA</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">kappa</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps_minus</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">eps_plus</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kappa_eps(t), Sec. 2 of (DFW22)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">j</span><span class="p">(</span><span class="n">eps</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">eps</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">t</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="n">eps</span><span class="o">**</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="n">expr</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">p</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="n">p</span>
+
+    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">eps_minus</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span> <span class="c1"># don&#39;t truncate for small eps</span>
+          <span class="n">expr</span> <span class="o">=</span> <span class="n">conditional</span><span class="p">(</span><span class="n">le</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">),</span> <span class="n">j</span><span class="p">(</span><span class="n">eps_minus</span><span class="p">),</span> <span class="n">expr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">eps_plus</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span> <span class="c1"># don&#39;t truncate for large eps</span>
+          <span class="n">expr</span> <span class="o">=</span> <span class="n">conditional</span><span class="p">(</span><span class="n">ge</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">eps_plus</span><span class="p">),</span> <span class="n">j</span><span class="p">(</span><span class="n">eps_plus</span><span class="p">),</span> <span class="n">expr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">expr</span>
+</pre></div>
+</div>
+<p>Energy <img class="math" src="_images/math/21a5e6d5117f094516bf556f07dfd8a5950cb2db.png" alt="\mathcal{J}_{\epsilon}"/>:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">J_eps</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps_minus</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">eps_plus</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Eq 2.2, Sec. 2 of (DFW22)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">grad_norm</span> <span class="o">=</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">kappa</span><span class="p">(</span><span class="n">grad_norm</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span> <span class="o">-</span> <span class="n">f</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span>
+</pre></div>
+</div>
+<p>Next let us define the clamp function</p>
+<div class="math">
+<p><img src="_images/math/472934f72e0a4933cd710ad27dc9bf443517b640.png" alt="\text{clamp}(t, \epsilon_{-}, \epsilon_{+}) :=
+\epsilon_{-} \land t \lor \epsilon_{+}"/></p>
+</div><p>which will be very useful throughout.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">clamp</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    max{eps_minus, min{t, eps_plus}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">max_value</span><span class="p">(</span><span class="n">eps_minus</span><span class="p">,</span> <span class="n">min_value</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Define</p>
+<div class="math">
+<p><img src="_images/math/d49d896e9c2f4c6e32c12107bcdec5105447a01a.png" alt="\phi_{\epsilon}(t) := \kappa(t) - \kappa(0)"/></p>
+</div><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">phi_eps</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Equation (3.1) in (DFW22),</span>
+<span class="sd">    phi_eps(t) = kappa_eps(t) - kappa_eps(0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">low_branch</span>  <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">eps_minus</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">mid_branch</span>  <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="n">p</span> <span class="o">-</span> <span class="n">const</span> <span class="o">*</span> <span class="n">eps_minus</span><span class="o">**</span><span class="n">p</span>
+    <span class="n">high_branch</span> <span class="o">=</span>  <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">eps_plus</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">const</span> <span class="o">*</span> <span class="p">(</span><span class="n">eps_plus</span><span class="o">**</span><span class="n">p</span> <span class="o">-</span> <span class="n">eps_minus</span><span class="o">**</span><span class="n">p</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">conditional</span><span class="p">(</span><span class="n">le</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">),</span> <span class="n">low_branch</span><span class="p">,</span>
+                       <span class="n">conditional</span><span class="p">(</span><span class="n">le</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">),</span>
+                                   <span class="n">mid_branch</span><span class="p">,</span> <span class="n">high_branch</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We will also need the convex conjugate (Legendre transform,
+Fenchel conjugate) of <img class="math" src="_images/math/7e195b6ca4c8f9ee5c882e7566280c80ea25a3f5.png" alt="\phi_{\epsilon}"/>:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">phi_eps_conj</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convex conjugate of Eq (3.1) in (DFW22)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">p</span> <span class="o">/</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># conjugate exponent of p s.t. 1/p + 1/pp = 1</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">low_branch</span>  <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">eps_minus</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">mid_branch</span>  <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">pp</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="n">pp</span> <span class="o">+</span> <span class="n">const</span> <span class="o">*</span> <span class="n">eps_minus</span><span class="o">**</span><span class="n">p</span>
+    <span class="n">high_branch</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">eps_plus</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span>
+                   <span class="o">-</span> <span class="n">const</span> <span class="o">*</span> <span class="p">(</span><span class="n">eps_plus</span><span class="o">**</span><span class="n">p</span> <span class="o">-</span> <span class="n">eps_minus</span><span class="o">**</span><span class="n">p</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">conditional</span><span class="p">(</span><span class="n">le</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">low_branch</span><span class="p">,</span>
+                       <span class="n">conditional</span><span class="p">(</span><span class="n">le</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_plus</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span>
+                                   <span class="n">mid_branch</span><span class="p">,</span> <span class="n">high_branch</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>and we will need <img class="math" src="_images/math/566c936992aba2d2e55f620144addb86aef2067a.png" alt="(\phi_{\epsilon, a})^{*} =
+((\phi_{\epsilon})_{a})^{*}"/> -
+the convex conjugate of the shift of <img class="math" src="_images/math/7e195b6ca4c8f9ee5c882e7566280c80ea25a3f5.png" alt="\phi_{\epsilon}"/></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">phi_eps_shift_conj</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convex conjugate of the shifted N-function phi_eps</span>
+<span class="sd">    Eq (3.1) in (DFW22), used for the error estimators</span>
+<span class="sd">    in section 6 of (DWF22)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Ca</span> <span class="o">=</span> <span class="n">clamp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Ca</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+    <span class="n">low_branch</span>  <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Ca</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">high_branch</span> <span class="o">=</span> <span class="p">(</span><span class="n">phi_eps_conj</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="n">phi_eps</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">-</span>
+                   <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Ca</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">conditional</span><span class="p">(</span><span class="n">le</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">low_branch</span><span class="p">,</span> <span class="n">high_branch</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we are ready to implement the following error measures:</p>
+<p><strong>Upper truncation error</strong></p>
+<div class="math">
+<p><img src="_images/math/64cd8b602e8e959274959e1a104b7894d4a17433.png" alt="\eta_{\epsilon_{+}}^2(v_n) := \mathcal{J}_{\epsilon_n}(v_n) -
+\mathcal{J}_{(\epsilon_{n,-}, \infty)}(v_n)"/></p>
+</div><p>which measures the effect of the upper truncation bound
+<img class="math" src="_images/math/a989a159739221600f69e82dffb4041de1ddb58d.png" alt="\epsilon_{n,+}"/>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">eta2_plus</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Upper truncation error squared</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">J_eps</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span> <span class="o">-</span>
+            <span class="n">J_eps</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p><strong>Lower truncation error</strong></p>
+<div class="math">
+<p><img src="_images/math/28908fb5d456da79920fdf097ed43623f6283082.png" alt="\eta_{\epsilon_{-}}^2(v_n) := \mathcal{J}_{\epsilon_n}(v_n) -
+\mathcal{J}_{(0, \epsilon_{n,+})}(v_n)"/></p>
+</div><p>which measures the effect of the lower truncation bound
+<img class="math" src="_images/math/9ba4610e6a74dadbf2e5159b8fe810b6f124a48a.png" alt="\epsilon_{n,-}"/>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">eta2_minus</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lower truncation error squared</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">J_eps</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span> <span class="o">-</span>
+            <span class="n">J_eps</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><strong>Discretization error</strong></p>
+<p>We use the optimal estimator <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id6" title="Lars Diening and Christian Kreuzer. Linear convergence of an adaptive finite element method for the p-laplacian equation. SIAM Journal on Numerical Analysis, 46(2):614–638, 2008. URL: http://www.jstor.org/stable/40233226 (visited on 2026-08-22).">DK08</a>]</span> with
+the <img class="math" src="_images/math/42f746ce768ea7094b9e11132e79c6cffced2418.png" alt="\phi_{\epsilon_n}"/> to estimate discretiztion
+error on mesh element <img class="math" src="_images/math/22e1a2659851bf5039487fc7ca9abd7c436ae089.png" alt="T"/>:</p>
+<div class="math">
+<p><img src="_images/math/e990c8d43d040fcca3074b1a664ac73070461295.png" alt="\eta_{h,T}^2(v_n) := \int_T (\phi_{\epsilon_n, | \nabla v_n|})^{*}
+(h_T |f|) \, dx \: + \: \sum_{F \subset \partial T} h_F
+\int_F | \llbracket V(v_n) \rrbracket |_F^2 \, ds"/></p>
+</div><p>where <img class="math" src="_images/math/2c488811ecb3d4f444e1b9cd1e880af14c118ec9.png" alt="\llbracket v \rrbracket = v_+ - v_-"/>  is
+the jump of <img class="math" src="_images/math/0e413a7336c71b639301ff57d406fc827bd3f4cb.png" alt="v"/>.
+The quantities <img class="math" src="_images/math/ef5c478fcf7b9f88b05cf07b3f2417013c2869c6.png" alt="h_F, h_T"/> are the characteristic
+lengths of a facet and triangle (element) respectively and
+<img class="math" src="_images/math/e8e4a1ae60f86586585f685c1f129c0faeb2f761.png" alt="V(v)"/> is defined as:</p>
+<div class="math">
+<p><img src="_images/math/8d24c8636e482904b5f1fd37d3f53d6b91737c54.png" alt="V_{\epsilon}(v) =
+   \begin{cases}
+       \left( \frac{\phi'_{\epsilon}(|v|)}{|v|} \right)^{1/2} v
+       \quad \text{ for } P \neq 0\\
+       0 \hspace{5.75em} \text{ for } P = 0
+   \end{cases}"/></p>
+</div><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">V_eps</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Definition 7 (DFW22)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">clamp</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span>
+</pre></div>
+</div>
+<p>Here we use a neat trick to transform
+the estimator into the following problem
+by working on a piecewise constant DG0 space, for details see:
+<a class="reference external" href="https://www.firedrakeproject.org/demos/adaptive_multigrid.py.html">https://www.firedrakeproject.org/demos/adaptive_multigrid.py.html</a></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">eta2_disc</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">uh</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Discretization error from (DK08)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h_T</span> <span class="o">=</span> <span class="n">CellDiameter</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="c1"># characteristic length of Triangle</span>
+    <span class="n">h_F</span> <span class="o">=</span> <span class="n">FacetArea</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="c1"># characteristic length of Facet</span>
+    <span class="n">vol</span> <span class="o">=</span> <span class="n">CellVolume</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;DG&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">TrialFunction</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+
+    <span class="n">grad_uh</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="n">uh</span><span class="p">)</span>
+    <span class="n">norm_grad_uh</span> <span class="o">=</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">grad_uh</span><span class="p">)</span>
+    <span class="n">eta2</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+
+    <span class="c1"># compute cellwise error estimator</span>
+    <span class="n">V_grad</span> <span class="o">=</span> <span class="n">V_eps</span><span class="p">(</span><span class="n">grad_uh</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">jump_V_grad</span> <span class="o">=</span> <span class="n">jump</span><span class="p">(</span><span class="n">V_grad</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">inner</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">q</span> <span class="o">/</span> <span class="n">vol</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span>
+    <span class="c1"># t = h_T * norm(f)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">h_T</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">integrand</span> <span class="o">=</span> <span class="n">phi_eps_shift_conj</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">norm_grad_uh</span><span class="p">,</span>
+                                   <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="p">(</span><span class="n">integrand</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span>
+    <span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">jump_V_grad</span><span class="p">,</span> <span class="n">jump_V_grad</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">avg</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">h_F</span><span class="p">))</span> <span class="o">*</span> <span class="n">dS</span><span class="p">)</span>
+
+    <span class="n">sp</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mat_type&quot;</span><span class="p">:</span> <span class="s2">&quot;matfree&quot;</span><span class="p">,</span> <span class="s2">&quot;ksp_type&quot;</span><span class="p">:</span> <span class="s2">&quot;preonly&quot;</span><span class="p">,</span> <span class="s2">&quot;pc_type&quot;</span><span class="p">:</span> <span class="s2">&quot;jacobi&quot;</span><span class="p">}</span>
+    <span class="n">solve</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">L</span><span class="p">,</span> <span class="n">eta2</span><span class="p">,</span> <span class="n">solver_parameters</span><span class="o">=</span><span class="n">sp</span><span class="p">)</span>
+
+    <span class="c1"># compute eta from eta^2</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;eta&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eta2</span><span class="p">))</span>
+    <span class="k">with</span> <span class="n">eta</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">vec_ro</span> <span class="k">as</span> <span class="n">eta_</span><span class="p">:</span>
+        <span class="n">error_disc</span> <span class="o">=</span> <span class="n">eta_</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">eta</span><span class="p">,</span> <span class="n">error_disc</span>
+</pre></div>
+</div>
+<p><strong>Linearization error</strong></p>
+<p>To measure the linearization error we can either choose the
+following estimator proposed in <span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id5" title="Lars Diening, Massimo Fornasier, and Maximilian Wank. A relaxed kačanov iteration for the $p$-poisson problem. 2022. URL: https://arxiv.org/abs/1702.03844, arXiv:1702.03844.">DFW22</a>]</span></p>
+<div class="math">
+<p><img src="_images/math/8ec9d25eaa2b9eec213912430451e1ad564a7491.png" alt="\eta_{lin}^2(v_n) := \int_{\Omega}
+(\phi_{\epsilon, | \nabla v_n|})^{*}
+\left( \frac{\phi'_{\epsilon}(| \nabla v_{n-1}|)}{
+\nabla v_{n-1}|} | \nabla (v_{n-1} - v_{n}| \right) \, dx"/></p>
+</div><p>or we can work with the natural distance which
+is the (integrated) Bregman divergence
+between <img class="math" src="_images/math/e07ee9d0937d023a987ea1caa9e2b3e4ee6332ad.png" alt="\nabla v_n - \nabla v_{n-1}"/> associated
+with <img class="math" src="_images/math/7e195b6ca4c8f9ee5c882e7566280c80ea25a3f5.png" alt="\phi_{\epsilon}"/> <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id7" title="Alexei Gazca. Numerical analysis of nonlinear pde. 2026. URL: https://karlin.mff.cuni.cz/~gazca/lectures/ss26/nonlinear_pde.pdf.">Gaz26</a>]</span>:</p>
+<div class="math">
+<p><img src="_images/math/38257995f5ff813b2ae3f1fe330d2423beb9d1eb.png" alt="\eta_{lin}^2(v_n) := \int_{\Omega}
+\left[ \phi_{\epsilon}(|\nabla v_{n-1}|)
+- \phi_{\epsilon}(|\nabla v_{n}|) -
+C(|\nabla v_n|)^{p-2} \nabla v_n \cdot (\nabla v_{n-1} -
+\nabla v_{n})
+\right] dx"/></p>
+</div><p>where <img class="math" src="_images/math/a53ee2dd021a5d81dea2904bfd172ccfcf810d6f.png" alt="C(a)"/> is the clamp function defined above.
+We will choose the first definition to work with,
+however we have implemented both for good measure.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">eta2_lin</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Linearization error proposed in (Gaz26)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">norm_grad_u_</span> <span class="o">=</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u_</span><span class="p">))</span>
+    <span class="n">norm_grad_u</span> <span class="o">=</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">clamp</span><span class="p">(</span><span class="n">norm_grad_u</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">energy_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">phi_eps</span><span class="p">(</span><span class="n">norm_grad_u_</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+                   <span class="o">-</span> <span class="n">phi_eps</span><span class="p">(</span><span class="n">norm_grad_u</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">correction</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">u_</span><span class="p">)</span> <span class="o">-</span> <span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">energy_diff</span> <span class="o">-</span> <span class="n">correction</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span>
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">eta2_lin_kac</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Linearization error proposed in (DFW22)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u_</span><span class="p">))</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">clamp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">C</span> <span class="o">*</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u_</span><span class="p">)</span> <span class="o">-</span> <span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">phi_eps_shift_conj</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span>
+</pre></div>
+</div>
+<section id="helper-functions">
+<h2>Helper functions<a class="headerlink" href="#helper-functions" title="Link to this heading">¶</a></h2>
+<p>This function does the ‘Kačanov step’ i.e.
+the following part of the algorithm:</p>
+<pre class="literal-block">│ Calculate <img class="math" src="_images/math/17b6173ff2ff69a07d9ae587294ddce0b27c2808.png" alt="u_{n+1}"/> by solving:
+│
+│     <img class="math" src="_images/math/e35c9db32f32b912af5bfe7395dc8ee980de77c2.png" alt="\int_\Omega a_n^{p-2} \nabla u_{n+1} \cdot
+\nabla v \, dx = \langle f, v \rangle \quad
+\forall v \in W^{1,2}_0(\Omega)"/>;</pre>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">kacanov_step</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">atm</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Do one Kacanov step i.e. Solve the linear poisson problem</span>
+<span class="sd">    -div(a*grad(u)) = f with coefficient matrix</span>
+<span class="sd">    a = clamp(grad(u_), eps_minus, eps_plus)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">TrialFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">bc</span> <span class="o">=</span> <span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;on_boundary&quot;</span><span class="p">)</span>
+    <span class="n">un</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;u&quot;</span><span class="p">)</span>
+
+    <span class="n">grad_norm</span> <span class="o">=</span> <span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u_</span><span class="p">))</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">clamp</span><span class="p">(</span><span class="n">grad_norm</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span> <span class="o">-</span> <span class="n">f</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span>
+
+    <span class="n">problem</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">LinearVariationalProblem</span><span class="p">(</span><span class="n">lhs</span><span class="p">(</span><span class="n">F</span><span class="p">),</span> <span class="n">rhs</span><span class="p">(</span><span class="n">F</span><span class="p">),</span> <span class="n">un</span><span class="p">,</span> <span class="n">bc</span><span class="p">)</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ksp_type&quot;</span><span class="p">:</span> <span class="s2">&quot;preonly&quot;</span><span class="p">,</span> <span class="s2">&quot;pc_type&quot;</span><span class="p">:</span> <span class="s2">&quot;lu&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;pc_factor_mat_solver_type&quot;</span><span class="p">:</span> <span class="s2">&quot;mumps&quot;</span><span class="p">}</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">LinearVariationalSolver</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span>
+                                        <span class="n">solver_parameters</span><span class="o">=</span><span class="n">sp</span><span class="p">)</span>
+
+    <span class="n">solver</span><span class="o">.</span><span class="n">set_transfer_manager</span><span class="p">(</span><span class="n">atm</span><span class="p">)</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">un</span>
+</pre></div>
+</div>
+<p>This function computes the estimated errors</p>
+<pre class="literal-block">│ <img class="math" src="_images/math/d7e6f07694161d65e97f5e2f53c11ed4594b8146.png" alt="\eta^2_{\epsilon+}(u_n),
+\eta^2_{\epsilon-}(u_n), \eta^2_h(u_n), \eta^2_{lin}(u_n)"/>:</pre>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">estimate_errors</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns (eta, errors) - discretization error on each element</span>
+<span class="sd">    and dictionary of the linearization, plus, minus and</span>
+<span class="sd">    discretization error sizes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">error2_minus</span> <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">eta2_minus</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+    <span class="n">error2_plus</span>  <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">eta2_plus</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+    <span class="c1"># error2_lin   = assemble(eta2_lin(u, u_, eps_minus, eps_plus, p))</span>
+    <span class="n">error2_lin</span>   <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">eta2_lin_kac</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span>
+                                         <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+    <span class="n">eta</span><span class="p">,</span> <span class="n">error2_disc</span> <span class="o">=</span> <span class="n">eta2_disc</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span>
+              <span class="s2">&quot;lin&quot;</span> <span class="p">:</span> <span class="n">error2_lin</span><span class="p">,</span> <span class="s2">&quot;plus&quot;</span> <span class="p">:</span> <span class="n">error2_plus</span><span class="p">,</span>
+              <span class="s2">&quot;minus&quot;</span> <span class="p">:</span> <span class="n">error2_minus</span><span class="p">,</span><span class="s2">&quot;disc&quot;</span> <span class="p">:</span> <span class="n">error2_disc</span>
+              <span class="p">}</span>
+    <span class="k">return</span> <span class="n">eta</span><span class="p">,</span> <span class="n">errors</span>
+</pre></div>
+</div>
+<p>Update the state according to the largest error estimate</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">adapt</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">amh</span><span class="p">,</span> <span class="n">eta_refinement</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span>
+          <span class="n">refinement_num</span><span class="p">,</span> <span class="n">max_refinements</span><span class="p">,</span>
+          <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">eps_tol</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the state according to the largest error estimate</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">largest_error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">errors</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">largest_error</span> <span class="o">==</span> <span class="s2">&quot;lin&quot;</span><span class="p">:</span>
+       <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">largest_error</span> <span class="o">==</span> <span class="s2">&quot;plus&quot;</span><span class="p">:</span>
+       <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">eps_plus</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">eps_tol</span><span class="p">):</span>
+           <span class="n">eps_plus</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="mf">1.25</span><span class="o">*</span><span class="n">eps_plus</span><span class="p">)</span>
+       <span class="k">else</span><span class="p">:</span>
+           <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">largest_error</span> <span class="o">==</span> <span class="s2">&quot;minus&quot;</span><span class="p">:</span>
+       <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">eps_minus</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="o">/</span><span class="n">eps_tol</span><span class="p">):</span>
+           <span class="n">eps_minus</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="mf">0.80</span><span class="o">*</span><span class="n">eps_minus</span><span class="p">)</span>
+       <span class="k">else</span><span class="p">:</span>
+           <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># &quot;disc&quot;</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">refinement_num</span> <span class="o">&lt;</span> <span class="n">max_refinements</span><span class="p">):</span>
+           <span class="n">amh</span><span class="o">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">eta</span><span class="p">,</span> <span class="n">eta_refinement</span><span class="p">)</span>
+           <span class="n">refinement_num</span> <span class="o">+=</span> <span class="mi">1</span>
+           <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">refinement_num</span><span class="p">,</span> <span class="kc">False</span>
+       <span class="k">else</span><span class="p">:</span>
+           <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">refinement_num</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">refinement_num</span><span class="p">,</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p>The main function that handles the logic.
+The code used for graphing, plotting etc.
+was created with Claude.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">p_poisson</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">make_f</span><span class="p">,</span> <span class="n">make_bc</span><span class="p">,</span> <span class="n">make_u_exact</span><span class="p">,</span>
+              <span class="n">mesh</span><span class="p">,</span> <span class="n">amh</span><span class="p">,</span> <span class="n">atm</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solves -div(|grad(u)|^(p-2) * grad(u)) = f on mesh</span>
+<span class="sd">    with boundary conditions given by &#39;bc&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">eps_plus</span>  <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">eps_minus</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">eps_tol</span>   <span class="o">=</span> <span class="mf">1e6</span>
+    <span class="n">eta_refinement</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">refinement_num</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_refinements</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">n_max</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span>
+    <span class="n">iter_num</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">cost</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">VTKFile</span><span class="p">(</span><span class="s2">&quot;results/u_level_0.pvd&quot;</span><span class="p">)</span>
+    <span class="n">u_</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="n">n_max</span><span class="p">):</span>
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">amh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># set up exact solution, f and boundary conditions</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">u_exact</span> <span class="o">=</span> <span class="n">make_u_exact</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">make_f</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="n">make_bc</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">u_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+           <span class="n">u_</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">u_</span><span class="o">.</span><span class="n">function_space</span><span class="p">()</span> <span class="o">!=</span> <span class="n">V</span><span class="p">:</span>
+           <span class="n">u_new</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+           <span class="n">atm</span><span class="o">.</span><span class="n">prolong</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">u_new</span><span class="p">)</span>
+           <span class="n">u_</span> <span class="o">=</span> <span class="n">u_new</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="n">kacanov_step</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">atm</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="n">eta</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">estimate_errors</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span>
+                                      <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="n">dofs</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+        <span class="n">cost</span> <span class="o">+=</span> <span class="n">dofs</span>
+
+        <span class="c1"># If we have exact solution available track difference in</span>
+        <span class="c1"># energies</span>
+        <span class="n">error_energy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">u_exact</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">error_energy</span> <span class="o">=</span> <span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">J_eps</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span><span class="p">))</span> <span class="o">-</span>
+                            <span class="n">assemble</span><span class="p">(</span><span class="n">J_eps</span><span class="p">(</span><span class="n">u_exact</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">)))</span>
+
+
+        <span class="n">record</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;iter&quot;</span><span class="p">:</span> <span class="n">iter_num</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="n">n</span><span class="p">,</span>
+                  <span class="s2">&quot;refinements&quot;</span><span class="p">:</span> <span class="n">refinement_num</span><span class="p">,</span>
+                  <span class="s2">&quot;dofs&quot;</span><span class="p">:</span> <span class="n">dofs</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="n">cost</span><span class="p">,</span>
+                  <span class="s2">&quot;error_energy&quot;</span><span class="p">:</span> <span class="n">error_energy</span><span class="p">,</span>
+                  <span class="s2">&quot;eps_minus&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">eps_minus</span><span class="p">),</span>
+                  <span class="s2">&quot;eps_plus&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">eps_plus</span><span class="p">),</span>
+                  <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">errors</span><span class="o">.</span><span class="n">items</span><span class="p">()}}</span>
+        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;iter=</span><span class="si">{</span><span class="n">iter_num</span><span class="si">}</span><span class="s2"> n=</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> refs=</span><span class="si">{</span><span class="n">refinement_num</span><span class="si">}</span><span class="s2"> &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;dofs=</span><span class="si">{</span><span class="n">dofs</span><span class="si">}</span><span class="s2"> cost=</span><span class="si">{</span><span class="n">cost</span><span class="si">}</span><span class="s2"> &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;eps=[</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">eps_minus</span><span class="p">)</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">eps_plus</span><span class="p">)</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">] &quot;</span>
+              <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">errors</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+              <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot; error_energy=</span><span class="si">{</span><span class="n">error_energy</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span>
+              <span class="k">if</span> <span class="n">error_energy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">errors</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converged at iter=</span><span class="si">{</span><span class="n">iter_num</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">iter_num</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="n">ref_num_old</span> <span class="o">=</span> <span class="n">refinement_num</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">refinement_num</span><span class="p">,</span> <span class="n">max_refinement_reached</span> <span class="o">=</span> <span class="n">adapt</span><span class="p">(</span>
+                <span class="n">errors</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">amh</span><span class="p">,</span> <span class="n">eta_refinement</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span>
+                <span class="n">refinement_num</span><span class="p">,</span> <span class="n">max_refinements</span><span class="p">,</span>
+                <span class="n">eps_minus</span><span class="p">,</span> <span class="n">eps_plus</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">max_refinement_reached</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning!: discretization error&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">errors</span><span class="p">[</span><span class="s1">&#39;disc&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">) still dominates after &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">max_refinements</span><span class="si">}</span><span class="s2"> refinements. Stopping.&quot;</span><span class="p">)</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">iter_num</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">refinement_num</span> <span class="o">!=</span> <span class="n">ref_num_old</span><span class="p">):</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">VTKFile</span><span class="p">(</span>
+                       <span class="sa">f</span><span class="s2">&quot;results/u_level_</span><span class="si">{</span><span class="n">refinement_num</span><span class="si">}</span><span class="s2">.pvd&quot;</span>
+                       <span class="p">)</span>
+            <span class="n">Q0</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;DG&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">gradnorm</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">Q0</span><span class="p">)</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)))</span>
+            <span class="k">with</span> <span class="n">gradnorm</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">vec_ro</span> <span class="k">as</span> <span class="n">gv</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  max|grad u| = </span><span class="si">{</span><span class="n">gv</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">fd</span><span class="o">.</span><span class="n">PETSc</span><span class="o">.</span><span class="n">NormType</span><span class="o">.</span><span class="n">NORM_INFINITY</span><span class="p">)</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">iter_num</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">u_</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">iter_num</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning!: Hit n_max=</span><span class="si">{</span><span class="n">n_max</span><span class="si">}</span><span class="s2"> without converging &quot;</span>
+               <span class="sa">f</span><span class="s2">&quot;tolerance tol=</span><span class="si">{</span><span class="n">tol</span><span class="si">}</span><span class="s2">&quot;</span>
+               <span class="p">)</span>
+    <span class="k">return</span> <span class="n">u</span><span class="p">,</span> <span class="n">history</span>
+</pre></div>
+</div>
+<p>Set p to anything in between 1 and 2.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="mi">16</span><span class="o">/</span><span class="mi">10</span>
+</pre></div>
+</div>
+<p><strong>Bump</strong>
+Choose <img class="math" src="_images/math/4508c25d4ab85c63dca95d269b63179fd3820699.png" alt="\Omega = [-1,1] \times [-1,1]"/> and choose
+<img class="math" src="_images/math/d552e5e0c61dad680fd662263f468fa1daa18ed9.png" alt="f"/> and <img class="math" src="_images/math/b8d12682cfb3fc4bca80cffe9c0ea1f61d8380b1.png" alt="\text{Tr }u"/> such that:</p>
+<div class="math">
+<p><img src="_images/math/27f1eb743d01f5a6aced5e79fff40c7f0bdc8d12.png" alt="u(x_1, x_2) = (x_1^2 - 1)(x_2^2 - 1)"/></p>
+</div><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">bump</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    u(x1, x2) = (x1^2 - 1)(x2^2 - 1) on [-1,1]^2,</span>
+<span class="sd">    u(x1, x2) = 0                    on boundary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_u_exact</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">SpatialCoordinate</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">u</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_f</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">SpatialCoordinate</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="o">-</span><span class="n">div</span><span class="p">(</span><span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">f</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_bc</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;on_boundary&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">make_u_exact</span><span class="p">,</span> <span class="n">make_f</span><span class="p">,</span> <span class="n">make_bc</span>
+</pre></div>
+</div>
+<p><strong>Needle</strong>
+On <img class="math" src="_images/math/ca34f1efd85a6bb2dc0654be16b45d7ef2ea07ac.png" alt="\Omega = [-1,1]^2"/> choose <img class="math" src="_images/math/d552e5e0c61dad680fd662263f468fa1daa18ed9.png" alt="f"/> and
+the boundary values of <img class="math" src="_images/math/b572002daef78e3ba6d937366f83114846586dfa.png" alt="u"/> s.t.
+<img class="math" src="_images/math/d826d4edf52380efc6a4d7c0642991560b031e73.png" alt="u(x) = |x|^(1-1/p)"/></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">needle</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    u(x) = |x|^{1-1/p} - 1 on [-1,1]^2.</span>
+<span class="sd">    Singular gradient at the origin -- this is the paper&#39;s stress test</span>
+<span class="sd">    for the estimator (V(grad u) has only borderline Lorentz-space regularity).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reg</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>   <span class="c1"># regularizes the 0/0 at the origin; small enough</span>
+                            <span class="c1"># not to visibly perturb u away from x=0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_u_exact</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">SpatialCoordinate</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">reg</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_f</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">SpatialCoordinate</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">reg</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">r</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">div</span><span class="p">(</span><span class="n">norm_safe</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_bc</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">SpatialCoordinate</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">mesh</span><span class="p">())</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">reg</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">u_bdry</span> <span class="o">=</span> <span class="n">r</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">u_bdry</span><span class="p">,</span> <span class="s2">&quot;on_boundary&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">make_u_exact</span><span class="p">,</span> <span class="n">make_f</span><span class="p">,</span> <span class="n">make_bc</span>
+</pre></div>
+</div>
+<p>Prepare the mesh <img class="math" src="_images/math/4508c25d4ab85c63dca95d269b63179fd3820699.png" alt="\Omega = [-1,1] \times [-1,1]"/></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Omega</span> <span class="o">=</span> <span class="n">WorkPlane</span><span class="p">(</span><span class="n">Axes</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">n</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">X</span><span class="p">))</span><span class="o">.</span><span class="n">RectangleC</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">Face</span><span class="p">()</span>
+<span class="n">geo</span> <span class="o">=</span> <span class="n">OCCGeometry</span><span class="p">(</span><span class="n">Omega</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ngmsh</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">GenerateMesh</span><span class="p">(</span><span class="n">maxh</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">ngmsh</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For the adaptive mesh refinment we will utilize firedrake’s
+<strong>AdaptiveMeshHierarchy</strong> and
+<strong>AdaptiveTransferManager</strong></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">amh</span> <span class="o">=</span> <span class="n">AdaptiveMeshHierarchy</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+<span class="n">atm</span> <span class="o">=</span> <span class="n">AdaptiveTransferManager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Prepare boundary conditions, the rhs and the exact solution</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># make_u_exact, make_f, make_bc = needle(p)</span>
+<span class="n">make_u_exact</span><span class="p">,</span> <span class="n">make_f</span><span class="p">,</span> <span class="n">make_bc</span> <span class="o">=</span> <span class="n">bump</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Run the thing</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">u</span><span class="p">,</span> <span class="n">history</span> <span class="o">=</span> <span class="n">p_poisson</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">make_f</span><span class="p">,</span> <span class="n">make_bc</span><span class="p">,</span>
+                       <span class="n">make_u_exact</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span>
+                       <span class="n">amh</span><span class="p">,</span> <span class="n">atm</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span>
+                       <span class="p">)</span>
+</pre></div>
+</div>
+<p>Function for plotting everything,
+once again this is Claude’s work.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_convergence</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+    <span class="n">cost</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">history</span><span class="p">]</span>
+    <span class="n">disc</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s2">&quot;disc&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">history</span><span class="p">]</span>
+    <span class="n">lin</span>  <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s2">&quot;lin&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">history</span><span class="p">]</span>
+    <span class="n">plus</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s2">&quot;plus&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">history</span><span class="p">]</span>
+    <span class="n">minus</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s2">&quot;minus&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">history</span><span class="p">]</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s2">&quot;error_energy&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">history</span> <span class="k">if</span> <span class="n">h</span><span class="p">[</span><span class="s2">&quot;error_energy&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">energy</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">cost</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">energy</span><span class="p">)],</span> <span class="n">energy</span><span class="p">,</span>
+                  <span class="s1">&#39;k:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$J(u_n) - J(u)$&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">disc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\eta_h^2$&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">lin</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\eta_</span><span class="si">{Kac}</span><span class="s2">^2$&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">plus</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\eta_{\epsilon+}^2$&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">minus</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\eta_{\epsilon-}^2$&quot;</span><span class="p">)</span>
+
+    <span class="n">c0</span> <span class="o">=</span> <span class="n">cost</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">cost</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="p">[</span><span class="n">c0</span> <span class="o">/</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cost</span><span class="p">]</span>   <span class="c1"># reference slope: 1/cost</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+              <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{cost}</span><span class="s2">^{-1}$&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;accumulated cost&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">case_name</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;results/</span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s2">_convergence.pdf&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot the errors vs acumulated cost</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_convergence</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="s2">&quot;bump&quot;</span><span class="p">)</span>
+<span class="c1"># plot_convergence(history, &quot;needle&quot;)</span>
+</pre></div>
+</div>
+<figure class="align-center">
+<img alt="_images/bump_convergence.png" src="_images/bump_convergence.png" />
+</figure>
+<p>Here is a plot of discretization error on levels 3, 6 and 15 for “<strong>bump</strong>” with <img class="math" src="_images/math/45839e027c4b94c2e35afe4949f41a4e120cdb0d.png" alt="p=16/10"/>.</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><figure class="align-center" id="id8">
+<a class="reference internal image-reference" href="_images/eta_l3.png"><img alt="Eta at level 3" src="_images/eta_l3.png" style="height: 150px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><em>Level 3</em></span><a class="headerlink" href="#id8" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><figure class="align-center" id="id9">
+<a class="reference internal image-reference" href="_images/eta_l6.png"><img alt="Eta at level 6" src="_images/eta_l6.png" style="height: 150px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><em>Level 6</em></span><a class="headerlink" href="#id9" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><figure class="align-center" id="id10">
+<a class="reference internal image-reference" href="_images/eta_l15.png"><img alt="Eta at level 15" src="_images/eta_l15.png" style="height: 150px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><em>Level 15</em></span><a class="headerlink" href="#id10" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The solutions at level 4 and 15 are shown below.</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><figure class="align-center" id="id11">
+<a class="reference internal image-reference" href="_images/solution_l4.png"><img alt="Solution, level 4" src="_images/solution_l4.png" style="height: 300px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><em>MG solution at level 4</em></span><a class="headerlink" href="#id11" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><figure class="align-center" id="id12">
+<a class="reference internal image-reference" href="_images/solution_l15.png"><img alt="Solution, level 15" src="_images/solution_l15.png" style="height: 300px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><em>MG solution at level 15</em></span><a class="headerlink" href="#id12" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+</tr>
+</tbody>
+</table>
+<p>A runnable version of this demo can be found <a class="reference download internal" download="" href="_downloads/e25153a9a7e7a00b86fd1b0513b0138f/relaxed_Kacanov.py"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a>.</p>
+</section>
+<section id="bibliography">
+<h2>Bibliography<a class="headerlink" href="#bibliography" title="Link to this heading">¶</a></h2>
+<div class="docutils container" id="id4">
+<div role="list" class="citation-list">
+<div class="citation" id="id5" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">DFW22</a><span class="fn-bracket">]</span></span>
+<p>Lars Diening, Massimo Fornasier, and Maximilian Wank. A relaxed kačanov iteration for the $p$-poisson problem. 2022. URL: <a class="reference external" href="https://arxiv.org/abs/1702.03844">https://arxiv.org/abs/1702.03844</a>, <a class="reference external" href="https://arxiv.org/abs/1702.03844">arXiv:1702.03844</a>.</p>
+</div>
+<div class="citation" id="id6" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">DK08</a><span class="fn-bracket">]</span></span>
+<p>Lars Diening and Christian Kreuzer. Linear convergence of an adaptive finite element method for the p-laplacian equation. <em>SIAM Journal on Numerical Analysis</em>, 46(2):614–638, 2008. URL: <a class="reference external" href="http://www.jstor.org/stable/40233226">http://www.jstor.org/stable/40233226</a> (visited on 2026-08-22).</p>
+</div>
+<div class="citation" id="id7" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">Gaz26</a><span class="fn-bracket">]</span></span>
+<p>Alexei Gazca. Numerical analysis of nonlinear pde. 2026. URL: <a class="reference external" href="https://karlin.mff.cuni.cz/~gazca/lectures/ss26/nonlinear_pde.pdf">https://karlin.mff.cuni.cz/~gazca/lectures/ss26/nonlinear_pde.pdf</a>.</p>
+</div>
+</div>
+</div>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-relaxed-kacanov-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="_downloads/40fc45a1b0045fa21e87d60747eaf48b/relaxed_Kacanov.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">relaxed_Kacanov.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="_downloads/e25153a9a7e7a00b86fd1b0513b0138f/relaxed_Kacanov.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">relaxed_Kacanov.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="_downloads/c32d656c60329f57771bf9ebfe1f4e48/relaxed_Kacanov.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">relaxed_Kacanov.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
